@@ -43,6 +43,33 @@ npm install
 npm run start:dev
 ```
 
+## Migrations
+
+Criar uma migration vazia:
+
+```bash
+npm run migration:create --name=CreateProducerTable
+```
+
+Gerar uma migration a partir das entidades:
+
+```bash
+npm run migration:generate --name=CreateProducerTable
+```
+
+Executar migrations:
+
+```bash
+npm run migration:run
+```
+
+Reverter a ultima migration:
+
+```bash
+npm run migration:revert
+```
+
 ## Endpoints
 
-- `GET /health`
+- `GET /api/v1/health`
+- `GET /api/v1/health?checkDatabase=true`

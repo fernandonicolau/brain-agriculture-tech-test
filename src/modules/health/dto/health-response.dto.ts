@@ -15,4 +15,10 @@ export class HealthResponseDto {
     example: '2026-03-14T15:30:00.000Z',
   })
   timestamp!: string;
+
+  @ApiProperty({
+    example: 'up',
+    required: false,
+  })
+  database?: 'up';
 }

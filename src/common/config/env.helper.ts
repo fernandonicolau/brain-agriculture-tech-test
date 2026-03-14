@@ -37,3 +37,7 @@ export function readEnvironment(): EnvironmentVariables {
     DB_NAME: readStringEnv('DB_NAME', 'brain_agriculture'),
   };
 }
+
+export function isTestEnvironment(): boolean {
+  return (process.env.NODE_ENV ?? 'development') === 'test';
+}
