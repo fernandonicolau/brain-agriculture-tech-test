@@ -1,4 +1,4 @@
-import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 import { BaseEntity } from '../../../common/database/entities/base.entity';
 import { HarvestCrop } from './harvest-crop.entity';
@@ -7,7 +7,6 @@ import { HarvestCrop } from './harvest-crop.entity';
   name: 'crops',
 })
 export class Crop extends BaseEntity {
-  @Index('UQ_crops_name', { unique: true })
   @Column({
     name: 'name',
     type: 'varchar',

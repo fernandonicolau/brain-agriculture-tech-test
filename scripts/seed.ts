@@ -133,18 +133,24 @@ async function seed(): Promise<void> {
 
   try {
     await dataSource.transaction(async (manager) => {
-      await manager.delete(HarvestCrop, {});
-      await manager.delete(Harvest, {});
-      await manager.delete(Farm, {});
-      await manager.delete(Crop, {});
-      await manager.delete(Producer, {});
+      await manager.query(`
+        TRUNCATE TABLE
+          "harvest_crops",
+          "harvests",
+          "farms",
+          "crops",
+          "producers"
+        RESTART IDENTITY CASCADE
+      `);
 
       const producers = await manager.save(
         Producer,
         producersSeed.map((producer) => manager.create(Producer, producer)),
       );
 
-      const producerByDocument = new Map(producers.map((producer) => [producer.document, producer]));
+      const producerByDocument = new Map(
+        producers.map((producer) => [producer.document, producer]),
+      );
 
       const farms = await manager.save(
         Farm,
