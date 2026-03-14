@@ -69,6 +69,25 @@ Reverter a ultima migration:
 npm run migration:revert
 ```
 
+## Seed de desenvolvimento
+
+O seed foi pensado para ambiente de desenvolvimento e faz reset dos dados de dominio antes de inserir os registros de exemplo. Isso permite rodar o comando mais de uma vez sem duplicar dados.
+
+Executar migrations e depois popular a base:
+
+```bash
+npm run migration:run
+npm run seed
+```
+
+O seed cria:
+
+- 3 produtores
+- 4 fazendas em estados diferentes: `MG`, `SP`, `MT`, `GO`
+- 5 culturas: `Soja`, `Milho`, `Algodao`, `Cafe`, `Cana-de-acucar`
+- 5 safras
+- associacoes entre safras e culturas suficientes para alimentar o dashboard
+
 ## Endpoints
 
 - `GET /api/v1/health`

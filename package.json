@@ -19,7 +19,8 @@
     "migration:generate": "node ./scripts/typeorm-migration.js generate",
     "migration:create": "node ./scripts/typeorm-migration.js create",
     "migration:run": "npm run typeorm -- migration:run",
-    "migration:revert": "npm run typeorm -- migration:revert"
+    "migration:revert": "npm run typeorm -- migration:revert",
+    "seed": "ts-node ./scripts/seed.ts"
   },
   "dependencies": {
     "@nestjs/config": "^4.0.2",
