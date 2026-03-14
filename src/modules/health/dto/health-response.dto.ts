@@ -17,6 +17,11 @@ export class HealthResponseDto {
   timestamp!: string;
 
   @ApiProperty({
+    example: 'development',
+  })
+  environment!: string;
+
+  @ApiProperty({
     example: 'up',
     required: false,
   })

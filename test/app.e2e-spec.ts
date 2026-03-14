@@ -27,6 +27,14 @@ describe('Health (e2e)', () => {
 
     expect(response.body.status).toBe('ok');
     expect(response.body.service).toBe('brain-agriculture-api');
+    expect(response.body.environment).toBe('test');
     expect(new Date(response.body.timestamp).toISOString()).toBe(response.body.timestamp);
+  });
+
+  it('/api/v1/health/live (GET)', async () => {
+    const response = await request(app.getHttpServer()).get('/api/v1/health/live').expect(200);
+
+    expect(response.body.status).toBe('ok');
+    expect(response.body.environment).toBe('test');
   });
 });

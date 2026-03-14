@@ -1,25 +1,32 @@
-import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { Request } from 'express';
-import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+
+import { AppLogger } from '../../logging/app-logger';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(LoggingInterceptor.name);
+  constructor(
+    private readonly appLogger: AppLogger,
+    private readonly environment: string,
+  ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
+    const response = context.switchToHttp().getResponse();
     const startedAt = Date.now();
     const { method, originalUrl } = request;
 
     return next.handle().pipe(
-      tap(() => {
-        this.logger.log(`${method} ${originalUrl} ${Date.now() - startedAt}ms`);
-      }),
-      catchError((error: unknown) => {
-        this.logger.error(`${method} ${originalUrl} ${Date.now() - startedAt}ms`);
-
-        return throwError(() => error);
+      finalize(() => {
+        this.appLogger.logRequest({
+          environment: this.environment,
+          method,
+          path: originalUrl,
+          statusCode: Number(response.statusCode),
+          durationMs: Date.now() - startedAt,
+        });
       }),
     );
   }
