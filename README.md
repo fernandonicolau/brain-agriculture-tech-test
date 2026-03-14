@@ -477,22 +477,88 @@ Exemplo:
 
 ## Deploy
 
-O projeto está preparado para deploy em ambientes containerizados com alguns pontos já endereçados:
+O projeto foi preparado para deploy simples em nuvem com foco em compatibilidade entre ambiente local e produção.
 
-- Dockerfile para desenvolvimento
-- `docker-compose.yml` com API e PostgreSQL
-- configuração via variáveis de ambiente
-- migrations controlando schema
-- readiness/liveness
-- logging estruturado em formato simples
+### Artefatos de container
 
-Para produção, a recomendação é:
+- [Dockerfile.dev](c:/Users/andre/Desktop/Desafio/brain-agriculture-tech-test/Dockerfile.dev): imagem de desenvolvimento com hot reload
+- [Dockerfile](c:/Users/andre/Desktop/Desafio/brain-agriculture-tech-test/Dockerfile): imagem final de produção com build multi-stage
+- [docker-compose.yml](c:/Users/andre/Desktop/Desafio/brain-agriculture-tech-test/docker-compose.yml): ambiente local com API e PostgreSQL
 
-1. gerar imagem com build de produção
-2. injetar variáveis de ambiente por secret manager ou plataforma
-3. executar migrations no pipeline ou job de release
-4. expor `/api/v1/health/live` e `/api/v1/health/ready` para orquestrador
-5. integrar logs com uma plataforma centralizada
+### Ajustes de produção adotados
+
+- build isolado em estágio próprio
+- imagem final sem dependências de desenvolvimento
+- `NODE_ENV=production` no runtime
+- execução sem hot reload
+- start estável via `npm run start:prod`
+- liveness e readiness para health checks
+
+### Variáveis de ambiente para produção
+
+As variáveis mínimas para produção são:
+
+```env
+NODE_ENV=production
+PORT=3000
+DB_HOST=...
+DB_PORT=5432
+DB_USERNAME=...
+DB_PASSWORD=...
+DB_NAME=...
+```
+
+### PostgreSQL em produção
+
+- a API espera PostgreSQL acessível pelas variáveis acima
+- o banco deve ser provisionado fora da aplicação
+- `synchronize` continua desabilitado
+
+### Migrations em produção
+
+A recomendação é executar migrations antes do start da aplicação em cada release.
+
+Exemplo:
+
+```bash
+npm run migration:run
+npm run start:prod
+```
+
+Se a plataforma permitir apenas um comando de start, o projeto já possui:
+
+```bash
+npm run start:render
+```
+
+Esse comando executa migrations e depois sobe a aplicação. Em ambientes com múltiplas réplicas, o ideal é mover migrations para job ou etapa separada do deploy.
+
+### Deploy no Render
+
+O projeto inclui um blueprint opcional em [render.yaml](c:/Users/andre/Desktop/Desafio/brain-agriculture-tech-test/render.yaml).
+
+Passo a passo resumido:
+
+1. Criar um novo serviço no Render a partir do repositório.
+2. Usar o `render.yaml` ou configurar manualmente um Web Service com Docker.
+3. Provisionar um PostgreSQL no próprio Render.
+4. Garantir as variáveis:
+   `NODE_ENV`, `PORT`, `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_NAME`
+5. Definir health check em:
+   `/api/v1/health/live`
+6. Executar migrations:
+   preferencialmente em job separado, ou via `npm run start:render` se o ambiente for simples
+7. Validar:
+   - `GET /api/v1/health/live`
+   - `GET /api/v1/health/ready`
+   - `GET /docs`
+
+### Deploy Manual com Docker
+
+```bash
+docker build -t brain-agriculture-api .
+docker run --env-file .env -p 3000:3000 brain-agriculture-api
+```
 
 ## Possíveis Melhorias Futuras
 

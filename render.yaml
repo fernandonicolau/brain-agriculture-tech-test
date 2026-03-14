@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: brain-agriculture-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/v1/health/live
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DB_HOST
+        fromDatabase:
+          name: brain-agriculture-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: brain-agriculture-postgres
+          property: port
+      - key: DB_USERNAME
+        fromDatabase:
+          name: brain-agriculture-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: brain-agriculture-postgres
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: brain-agriculture-postgres
+          property: database
+
+databases:
+  - name: brain-agriculture-postgres
+    plan: free
+    databaseName: brain_agriculture
+    user: brain_agriculture
