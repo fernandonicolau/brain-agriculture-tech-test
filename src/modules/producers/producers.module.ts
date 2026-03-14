@@ -10,6 +10,6 @@ import { ProducersService } from './producers.service';
   imports: [TypeOrmModule.forFeature([Producer])],
   controllers: [ProducersController],
   providers: [ProducersRepository, ProducersService],
-  exports: [ProducersService],
+  exports: [ProducersRepository, ProducersService],
 })
 export class ProducersModule {}
