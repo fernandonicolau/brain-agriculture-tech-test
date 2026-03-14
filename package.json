@@ -21,7 +21,16 @@
     "migration:create": "node ./scripts/typeorm-migration.js create",
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
-    "seed": "ts-node ./scripts/seed.ts"
+    "seed": "ts-node ./scripts/seed.ts",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down",
+    "docker:down:volumes": "docker compose down -v",
+    "docker:logs": "docker compose logs -f app postgres",
+    "docker:ps": "docker compose ps",
+    "migration:run:docker": "docker compose exec app npm run migration:run",
+    "seed:docker": "docker compose exec app npm run seed",
+    "dev:docker": "npm run docker:up && npm run migration:run:docker",
+    "stop:docker": "npm run docker:down"
   },
   "dependencies": {
     "@nestjs/config": "^4.0.2",

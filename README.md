@@ -291,6 +291,20 @@ Para remover também o volume do banco:
 docker compose down -v
 ```
 
+Scripts auxiliares:
+
+```bash
+npm run docker:up
+npm run docker:down
+npm run docker:down:volumes
+npm run docker:logs
+npm run docker:ps
+npm run migration:run:docker
+npm run seed:docker
+npm run dev:docker
+npm run stop:docker
+```
+
 ## Migrations
 
 Scripts disponíveis:
@@ -305,6 +319,7 @@ npm run migration:revert
 Observações:
 
 - a CLI usa o arquivo [data-source.ts](c:/Users/andre/Desktop/Desafio/brain-agriculture-tech-test/data-source.ts)
+- o Nest em runtime nao usa glob amplo de entities ou migrations; isso fica restrito ao data source da CLI para evitar carregamento incorreto no ambiente Docker local
 - `migration:generate` depende das entidades refletirem corretamente o estado desejado do banco
 
 ## Seed

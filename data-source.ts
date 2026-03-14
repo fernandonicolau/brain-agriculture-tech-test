@@ -3,6 +3,8 @@ import 'reflect-metadata';
 
 import { DataSource } from 'typeorm';
 
-import { getTypeOrmOptions } from './src/common/database/typeorm.config';
+import { getTypeOrmDataSourceOptions } from './src/common/database/typeorm.config';
 
-export default new DataSource(getTypeOrmOptions());
+const AppDataSource = new DataSource(getTypeOrmDataSourceOptions());
+
+export default AppDataSource;

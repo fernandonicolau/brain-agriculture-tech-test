@@ -1,17 +1,16 @@
+import { join } from 'node:path';
+
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import { DataSourceOptions } from 'typeorm';
 
 import { EnvironmentVariables } from '../config/env.interface';
 import { readEnvironment } from '../config/env.helper';
+import { databaseEntities } from './database-entities';
 
-const migrationPaths = [
-  'src/common/database/migrations/*{.ts,.js}',
-  'dist/common/database/migrations/*{.ts,.js}',
-];
-const entityPaths = ['dist/**/*.entity.js', 'src/**/*.entity.ts'];
+const migrationPaths = [join(__dirname, 'migrations', '*{.ts,.js}')];
 
-export function getTypeOrmOptions(): DataSourceOptions {
+export function getTypeOrmDataSourceOptions(): DataSourceOptions {
   const env = readEnvironment();
 
   return {
@@ -23,7 +22,7 @@ export function getTypeOrmOptions(): DataSourceOptions {
     database: env.DB_NAME,
     synchronize: false,
     logging: env.NODE_ENV === 'development',
-    entities: entityPaths,
+    entities: databaseEntities,
     migrations: migrationPaths,
     migrationsTableName: 'migrations',
   };
@@ -43,7 +42,5 @@ export const typeOrmModuleOptions: TypeOrmModuleAsyncOptions = {
     logging: configService.get('NODE_ENV', { infer: true }) === 'development',
     retryAttempts: 3,
     retryDelay: 3000,
-    migrations: migrationPaths,
-    migrationsTableName: 'migrations',
   }),
 };
