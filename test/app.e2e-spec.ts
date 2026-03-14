@@ -1,8 +1,9 @@
-import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
 import { AppModule } from '../src/app.module';
+import { setupApplication } from '../src/common/setup-app';
 
 describe('Health (e2e)', () => {
   let app: INestApplication;
@@ -13,20 +14,7 @@ describe('Health (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.setGlobalPrefix('api', {
-      exclude: ['/health'],
-    });
-    app.enableVersioning({
-      type: VersioningType.URI,
-      defaultVersion: '1',
-    });
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        transform: true,
-        forbidNonWhitelisted: true,
-      }),
-    );
+    setupApplication(app);
     await app.init();
   });
 
@@ -34,8 +22,8 @@ describe('Health (e2e)', () => {
     await app.close();
   });
 
-  it('/health (GET)', async () => {
-    const response = await request(app.getHttpServer()).get('/health').expect(200);
+  it('/api/v1/health (GET)', async () => {
+    const response = await request(app.getHttpServer()).get('/api/v1/health').expect(200);
 
     expect(response.body.status).toBe('ok');
     expect(response.body.service).toBe('brain-agriculture-api');
