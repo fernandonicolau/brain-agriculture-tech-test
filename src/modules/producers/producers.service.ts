@@ -1,6 +1,12 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
 
+import { validateBrazilianDocument } from '../../common/validators/document.validator';
 import { Producer } from '../agriculture/entities/producer.entity';
 import { CreateProducerDto } from './dto/create-producer.dto';
 import { ListProducersQueryDto } from './dto/list-producers-query.dto';
@@ -22,17 +28,18 @@ export class ProducersService {
   constructor(private readonly producersRepository: ProducersRepository) {}
 
   async create(createProducerDto: CreateProducerDto): Promise<ProducerResponseDto> {
-    this.validateProducerDocument(createProducerDto.document);
+    const normalizedDocument = this.validateProducerDocument(createProducerDto.document);
 
-    const existingProducer = await this.producersRepository.findByDocument(
-      createProducerDto.document,
-    );
+    const existingProducer = await this.producersRepository.findByDocument(normalizedDocument);
 
     if (existingProducer) {
       throw new ConflictException('Producer document already exists');
     }
 
-    const producer = this.producersRepository.create(createProducerDto);
+    const producer = this.producersRepository.create({
+      ...createProducerDto,
+      document: normalizedDocument,
+    });
 
     try {
       const savedProducer = await this.producersRepository.save(producer);
@@ -75,15 +82,16 @@ export class ProducersService {
     }
 
     if (updateProducerDto.document && updateProducerDto.document !== producer.document) {
-      this.validateProducerDocument(updateProducerDto.document);
+      const normalizedDocument = this.validateProducerDocument(updateProducerDto.document);
 
-      const producerWithSameDocument = await this.producersRepository.findByDocument(
-        updateProducerDto.document,
-      );
+      const producerWithSameDocument =
+        await this.producersRepository.findByDocument(normalizedDocument);
 
       if (producerWithSameDocument && producerWithSameDocument.id !== producer.id) {
         throw new ConflictException('Producer document already exists');
       }
+
+      updateProducerDto.document = normalizedDocument;
     }
 
     Object.assign(producer, updateProducerDto);
@@ -108,8 +116,14 @@ export class ProducersService {
     await this.producersRepository.remove(producer);
   }
 
-  private validateProducerDocument(document: string): void {
-    void document;
+  private validateProducerDocument(document: string): string {
+    const validationResult = validateBrazilianDocument(document);
+
+    if (!validationResult) {
+      throw new BadRequestException('Producer document must be a valid CPF or CNPJ');
+    }
+
+    return validationResult.normalizedDocument;
   }
 
   private handleDuplicateDocumentError(error: unknown): void {

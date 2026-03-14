@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 
+import { isFarmAreaUsageValid } from '../../common/validators/farm-area.validator';
 import { Producer } from '../agriculture/entities/producer.entity';
 import { ProducersRepository } from '../producers/producers.repository';
 import { CreateFarmDto } from './dto/create-farm.dto';
@@ -26,7 +27,7 @@ export class FarmsService {
 
   async create(createFarmDto: CreateFarmDto): Promise<FarmResponseDto> {
     await this.ensureProducerExists(createFarmDto.producerId);
-    this.validateAreaRulesPlaceholder(createFarmDto);
+    this.validateAreaRules(createFarmDto);
 
     const farm = this.farmsRepository.create({
       ...this.normalizeFarmPayload(createFarmDto),
@@ -71,7 +72,11 @@ export class FarmsService {
       await this.ensureProducerExists(updateFarmDto.producerId);
     }
 
-    this.validateAreaRulesPlaceholder(updateFarmDto);
+    this.validateAreaRules({
+      totalArea: updateFarmDto.totalArea ?? Number(farm.totalArea),
+      arableArea: updateFarmDto.arableArea ?? Number(farm.arableArea),
+      vegetationArea: updateFarmDto.vegetationArea ?? Number(farm.vegetationArea),
+    });
 
     Object.assign(farm, this.normalizeFarmPayload(updateFarmDto));
 
@@ -98,7 +103,17 @@ export class FarmsService {
     }
   }
 
-  private validateAreaRulesPlaceholder(_payload: Partial<CreateFarmDto | UpdateFarmDto>): void {}
+  private validateAreaRules(payload: {
+    totalArea: number;
+    arableArea: number;
+    vegetationArea: number;
+  }): void {
+    if (!isFarmAreaUsageValid(payload)) {
+      throw new BadRequestException(
+        'The sum of arableArea and vegetationArea cannot exceed totalArea',
+      );
+    }
+  }
 
   private normalizeFarmPayload(payload: Partial<CreateFarmDto | UpdateFarmDto>) {
     return {

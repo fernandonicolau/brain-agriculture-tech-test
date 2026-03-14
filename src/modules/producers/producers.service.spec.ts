@@ -11,7 +11,7 @@ describe('ProducersService', () => {
 
   const baseProducer: Producer = {
     id: '4d8b92d1-42a2-48a4-92f0-c20985060f54',
-    document: '12345678901',
+    document: '52998224725',
     name: 'Maria da Silva',
     createdAt: new Date('2026-03-14T18:45:00.000Z'),
     updatedAt: new Date('2026-03-14T18:45:00.000Z'),
@@ -33,7 +33,7 @@ describe('ProducersService', () => {
 
   it('creates a producer', async () => {
     const dto: CreateProducerDto = {
-      document: '12345678901',
+      document: '529.982.247-25',
       name: 'Maria da Silva',
     };
 
@@ -43,9 +43,12 @@ describe('ProducersService', () => {
 
     const result = await service.create(dto);
 
-    expect(result.document).toBe(dto.document);
-    expect(repository.findByDocument).toHaveBeenCalledWith(dto.document);
-    expect(repository.create).toHaveBeenCalledWith(dto);
+    expect(result.document).toBe('52998224725');
+    expect(repository.findByDocument).toHaveBeenCalledWith('52998224725');
+    expect(repository.create).toHaveBeenCalledWith({
+      ...dto,
+      document: '52998224725',
+    });
   });
 
   it('throws conflict when document already exists', async () => {
@@ -53,10 +56,22 @@ describe('ProducersService', () => {
 
     await expect(
       service.create({
-        document: '12345678901',
+        document: '529.982.247-25',
         name: 'Maria da Silva',
       }),
     ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('throws bad request when document is invalid', async () => {
+    await expect(
+      service.create({
+        document: '11111111111',
+        name: 'Maria da Silva',
+      }),
+    ).rejects.toMatchObject({
+      status: 400,
+      message: 'Producer document must be a valid CPF or CNPJ',
+    });
   });
 
   it('throws not found when producer does not exist', async () => {

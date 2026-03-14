@@ -73,3 +73,8 @@ npm run migration:revert
 
 - `GET /api/v1/health`
 - `GET /api/v1/health?checkDatabase=true`
+
+## Regras de negocio
+
+- A validacao de CPF/CNPJ foi implementada manualmente em [src/common/validators/document.validator.ts](src/common/validators/document.validator.ts) para evitar dependencia extra e manter a regra explicita no projeto.
+- A regra de area da fazenda usa `arableArea + vegetationArea <= totalArea` e esta centralizada em [src/common/validators/farm-area.validator.ts](src/common/validators/farm-area.validator.ts).

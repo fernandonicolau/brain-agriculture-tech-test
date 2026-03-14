@@ -100,6 +100,25 @@ describe('FarmsService', () => {
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 
+  it('throws bad request when the sum of areas exceeds total area', async () => {
+    producersRepository.findById.mockResolvedValue(producer);
+
+    await expect(
+      service.create({
+        producerId: producer.id,
+        name: 'Fazenda Primavera',
+        city: 'Sorriso',
+        state: 'MT',
+        totalArea: 1000,
+        arableArea: 800,
+        vegetationArea: 300,
+      }),
+    ).rejects.toMatchObject({
+      status: 400,
+      message: 'The sum of arableArea and vegetationArea cannot exceed totalArea',
+    });
+  });
+
   it('returns producer summary on findOne', async () => {
     farmsRepository.findByIdWithProducer.mockResolvedValue(farmEntity as never);
 
