@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 
 import { CropsModule } from '../crops/crops.module';
+import { DashboardModule } from '../dashboard/dashboard.module';
 import { FarmsModule } from '../farms/farms.module';
 import { HarvestsModule } from '../harvests/harvests.module';
 import { ProducersModule } from '../producers/producers.module';
 
 @Module({
-  imports: [ProducersModule, FarmsModule, CropsModule, HarvestsModule],
-  exports: [ProducersModule, FarmsModule, CropsModule, HarvestsModule],
+  imports: [ProducersModule, FarmsModule, CropsModule, HarvestsModule, DashboardModule],
+  exports: [ProducersModule, FarmsModule, CropsModule, HarvestsModule, DashboardModule],
 })
 export class AgricultureModule {}
