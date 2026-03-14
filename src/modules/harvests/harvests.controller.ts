@@ -1,0 +1,174 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Version,
+} from '@nestjs/common';
+import {
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
+
+import { AttachCropDto } from './dto/attach-crop.dto';
+import { CreateHarvestDto } from './dto/create-harvest.dto';
+import { HarvestResponseDto } from './dto/harvest-response.dto';
+import { ListHarvestsQueryDto } from './dto/list-harvests-query.dto';
+import { PaginatedHarvestsResponseDto } from './dto/paginated-harvests-response.dto';
+import { UpdateHarvestDto } from './dto/update-harvest.dto';
+import { HarvestsService } from './harvests.service';
+
+@ApiTags('Harvests')
+@Controller('harvests')
+export class HarvestsController {
+  constructor(private readonly harvestsService: HarvestsService) {}
+
+  @Post()
+  @Version('1')
+  @ApiOperation({
+    summary: 'Cria uma safra',
+  })
+  @ApiCreatedResponse({
+    type: HarvestResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Fazenda nao encontrada.',
+  })
+  create(@Body() createHarvestDto: CreateHarvestDto): Promise<HarvestResponseDto> {
+    return this.harvestsService.create(createHarvestDto);
+  }
+
+  @Get()
+  @Version('1')
+  @ApiOperation({
+    summary: 'Lista safras com paginacao',
+  })
+  @ApiOkResponse({
+    type: PaginatedHarvestsResponseDto,
+  })
+  findAll(@Query() query: ListHarvestsQueryDto): Promise<PaginatedHarvestsResponseDto> {
+    return this.harvestsService.findAll(query);
+  }
+
+  @Get(':id')
+  @Version('1')
+  @ApiOperation({
+    summary: 'Busca uma safra com suas culturas',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'UUID da safra',
+  })
+  @ApiOkResponse({
+    type: HarvestResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Safra nao encontrada.',
+  })
+  findOne(@Param('id') id: string): Promise<HarvestResponseDto> {
+    return this.harvestsService.findOne(id);
+  }
+
+  @Patch(':id')
+  @Version('1')
+  @ApiOperation({
+    summary: 'Atualiza uma safra',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'UUID da safra',
+  })
+  @ApiOkResponse({
+    type: HarvestResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Safra ou fazenda nao encontrada.',
+  })
+  update(
+    @Param('id') id: string,
+    @Body() updateHarvestDto: UpdateHarvestDto,
+  ): Promise<HarvestResponseDto> {
+    return this.harvestsService.update(id, updateHarvestDto);
+  }
+
+  @Delete(':id')
+  @Version('1')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Remove uma safra',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'UUID da safra',
+  })
+  @ApiNoContentResponse({
+    description: 'Safra removida com sucesso.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Safra nao encontrada.',
+  })
+  remove(@Param('id') id: string): Promise<void> {
+    return this.harvestsService.remove(id);
+  }
+
+  @Post(':id/crops')
+  @Version('1')
+  @ApiOperation({
+    summary: 'Associa uma cultura a uma safra',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'UUID da safra',
+  })
+  @ApiCreatedResponse({
+    type: HarvestResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Safra ou cultura nao encontrada.',
+  })
+  @ApiConflictResponse({
+    description: 'Cultura ja associada a safra.',
+  })
+  attachCrop(
+    @Param('id') id: string,
+    @Body() attachCropDto: AttachCropDto,
+  ): Promise<HarvestResponseDto> {
+    return this.harvestsService.attachCrop(id, attachCropDto);
+  }
+
+  @Delete(':id/crops/:cropId')
+  @Version('1')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Remove a associacao entre safra e cultura',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'UUID da safra',
+  })
+  @ApiParam({
+    name: 'cropId',
+    description: 'UUID da cultura',
+  })
+  @ApiNoContentResponse({
+    description: 'Associacao removida com sucesso.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Safra ou associacao nao encontrada.',
+  })
+  detachCrop(@Param('id') id: string, @Param('cropId') cropId: string): Promise<void> {
+    return this.harvestsService.detachCrop(id, cropId);
+  }
+}

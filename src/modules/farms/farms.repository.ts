@@ -38,6 +38,11 @@ export class FarmsRepository {
       where: { id },
       relations: {
         producer: true,
+        harvests: {
+          harvestCrops: {
+            crop: true,
+          },
+        },
       },
     });
   }

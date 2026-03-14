@@ -123,6 +123,19 @@ export class FarmsService {
       createdAt: Date;
       updatedAt: Date;
       producer?: Producer;
+      harvests?: Array<{
+        id: string;
+        name: string;
+        year: number;
+        harvestCrops?: Array<{
+          crop: {
+            id: string;
+            name: string;
+            createdAt: Date;
+            updatedAt: Date;
+          };
+        }>;
+      }>;
     },
     includeProducer = false,
   ): FarmResponseDto {
@@ -144,6 +157,21 @@ export class FarmsService {
               document: farm.producer.document,
               name: farm.producer.name,
             }
+          : undefined,
+      harvests:
+        includeProducer && farm.harvests
+          ? farm.harvests.map((harvest) => ({
+              id: harvest.id,
+              name: harvest.name,
+              year: harvest.year,
+              crops:
+                harvest.harvestCrops?.map((item) => ({
+                  id: item.crop.id,
+                  name: item.crop.name,
+                  createdAt: item.crop.createdAt.toISOString(),
+                  updatedAt: item.crop.updatedAt.toISOString(),
+                })) ?? [],
+            }))
           : undefined,
     };
   }

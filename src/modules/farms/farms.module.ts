@@ -11,6 +11,6 @@ import { FarmsService } from './farms.service';
   imports: [TypeOrmModule.forFeature([Farm]), ProducersModule],
   controllers: [FarmsController],
   providers: [FarmsRepository, FarmsService],
-  exports: [FarmsService],
+  exports: [FarmsRepository, FarmsService],
 })
 export class FarmsModule {}

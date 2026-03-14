@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { CropResponseDto } from '../../crops/dto/crop-response.dto';
+
 class FarmProducerSummaryDto {
   @ApiProperty({
     example: '4d8b92d1-42a2-48a4-92f0-c20985060f54',
@@ -15,6 +17,29 @@ class FarmProducerSummaryDto {
     example: 'Maria da Silva',
   })
   name!: string;
+}
+
+class FarmHarvestResponseDto {
+  @ApiProperty({
+    example: '7a8d4af5-f9b8-4d6a-b334-4493accc5101',
+  })
+  id!: string;
+
+  @ApiProperty({
+    example: 'Safra 2024/2025',
+  })
+  name!: string;
+
+  @ApiProperty({
+    example: 2024,
+  })
+  year!: number;
+
+  @ApiProperty({
+    type: [CropResponseDto],
+    required: false,
+  })
+  crops?: CropResponseDto[];
 }
 
 export class FarmResponseDto {
@@ -73,4 +98,10 @@ export class FarmResponseDto {
     required: false,
   })
   producer?: FarmProducerSummaryDto;
+
+  @ApiProperty({
+    type: [FarmHarvestResponseDto],
+    required: false,
+  })
+  harvests?: FarmHarvestResponseDto[];
 }
