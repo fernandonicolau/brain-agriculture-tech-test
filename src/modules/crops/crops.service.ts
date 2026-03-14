@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 
 import { Crop } from '../agriculture/entities/crop.entity';
 import { CreateCropDto } from './dto/create-crop.dto';
@@ -30,16 +30,6 @@ export class CropsService {
     const crops = await this.cropsRepository.findAll();
 
     return crops.map((crop) => this.toResponse(crop));
-  }
-
-  async findOneOrFail(id: string): Promise<Crop> {
-    const crop = await this.cropsRepository.findById(id);
-
-    if (!crop) {
-      throw new NotFoundException('Crop not found');
-    }
-
-    return crop;
   }
 
   private toResponse(crop: Crop): CropResponseDto {
