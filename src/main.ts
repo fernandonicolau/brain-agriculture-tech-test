@@ -1,10 +1,13 @@
 import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
+import { EnvironmentVariables } from './common/config/env.interface';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService<EnvironmentVariables, true>);
 
   app.setGlobalPrefix('api', {
     exclude: ['/health'],
@@ -23,7 +26,7 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  const port = Number(process.env.PORT ?? 3000);
+  const port = configService.get('PORT', { infer: true });
 
   await app.listen(port);
 }
