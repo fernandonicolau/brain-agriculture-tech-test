@@ -1,4 +1,9 @@
 import { Module } from '@nestjs/common';
 
-@Module({})
+import { ProducersModule } from '../producers/producers.module';
+
+@Module({
+  imports: [ProducersModule],
+  exports: [ProducersModule],
+})
 export class AgricultureModule {}

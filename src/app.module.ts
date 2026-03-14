@@ -9,6 +9,8 @@ import { typeOrmModuleOptions } from './common/database/typeorm.config';
 import { AgricultureModule } from './modules/agriculture/agriculture.module';
 import { HealthModule } from './modules/health/health.module';
 
+const shouldLoadDatabaseModules = !isTestEnvironment();
+
 const infrastructureModules = [
   ConfigModule.forRoot({
     isGlobal: true,
@@ -16,8 +18,8 @@ const infrastructureModules = [
     envFilePath: ['.env'],
     load: [appConfig, databaseConfig],
   }),
-  ...(!isTestEnvironment() ? [TypeOrmModule.forRootAsync(typeOrmModuleOptions)] : []),
-  AgricultureModule,
+  ...(shouldLoadDatabaseModules ? [TypeOrmModule.forRootAsync(typeOrmModuleOptions)] : []),
+  ...(shouldLoadDatabaseModules ? [AgricultureModule] : []),
   HealthModule,
 ];
 
