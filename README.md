@@ -188,6 +188,8 @@ Arquivo de exemplo: [.env.example](c:/Users/andre/Desktop/Desafio/brain-agricult
 ```env
 PORT=3000
 NODE_ENV=development
+# Opcional: use DATABASE_URL em vez das variáveis abaixo
+# DATABASE_URL=postgresql://postgres:postgres@postgres:5432/brain_agriculture
 DB_HOST=postgres
 DB_PORT=5432
 DB_USERNAME=postgres
@@ -219,7 +221,9 @@ Copy-Item .env.example .env
 
 ### 3. Ajustar a conexão com o PostgreSQL local
 
-Exemplo:
+Voce pode usar `DATABASE_URL` ou variaveis separadas.
+
+Exemplo com variaveis separadas:
 
 ```env
 DB_HOST=localhost
@@ -227,6 +231,12 @@ DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=postgres
 DB_NAME=brain_agriculture
+```
+
+Exemplo com URL:
+
+```env
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/brain_agriculture
 ```
 
 ### 4. Executar migrations
@@ -516,6 +526,7 @@ As variáveis mínimas para produção são:
 ```env
 NODE_ENV=production
 PORT=3000
+# Ou DATABASE_URL=postgresql://user:password@host:5432/database
 DB_HOST=...
 DB_PORT=5432
 DB_USERNAME=...

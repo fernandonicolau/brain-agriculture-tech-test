@@ -6,6 +6,7 @@ export const databaseConfig = registerAs('database', () => {
   const env = readEnvironment();
 
   return {
+    url: env.DATABASE_URL,
     host: env.DB_HOST,
     port: env.DB_PORT,
     username: env.DB_USERNAME,
