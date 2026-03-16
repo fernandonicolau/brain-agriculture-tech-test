@@ -22,6 +22,26 @@ function readOptionalStringEnv(name: string): string | undefined {
   return trimmedValue === '' ? undefined : trimmedValue;
 }
 
+function readBooleanEnv(name: string, fallback = false): boolean {
+  const rawValue = process.env[name];
+
+  if (rawValue === undefined || rawValue.trim() === '') {
+    return fallback;
+  }
+
+  const normalizedValue = rawValue.trim().toLowerCase();
+
+  if (['true', '1', 'yes', 'y', 'on'].includes(normalizedValue)) {
+    return true;
+  }
+
+  if (['false', '0', 'no', 'n', 'off'].includes(normalizedValue)) {
+    return false;
+  }
+
+  throw new Error(`Environment variable ${name} must be a valid boolean`);
+}
+
 function readNumberEnv(name: string, fallback?: number): number {
   const rawValue = process.env[name] ?? fallback?.toString();
 
@@ -84,6 +104,8 @@ export function readEnvironment(): EnvironmentVariables {
     PORT: readNumberEnv('PORT', 3000),
     NODE_ENV: readStringEnv('NODE_ENV', 'development'),
     DATABASE_URL: databaseUrl,
+    DB_SSL: readBooleanEnv('DB_SSL', false),
+    DB_SSL_REJECT_UNAUTHORIZED: readBooleanEnv('DB_SSL_REJECT_UNAUTHORIZED', false),
     ...databaseConfig,
   };
 }

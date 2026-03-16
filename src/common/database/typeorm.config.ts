@@ -23,6 +23,11 @@ function getDatabaseConnectionOptions() {
           password: env.DB_PASSWORD,
           database: env.DB_NAME,
         }),
+    ssl: env.DB_SSL
+      ? {
+          rejectUnauthorized: env.DB_SSL_REJECT_UNAUTHORIZED,
+        }
+      : false,
     logging: env.NODE_ENV === 'development',
   };
 }
