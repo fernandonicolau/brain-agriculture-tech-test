@@ -8,11 +8,11 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "nest build",
+    "build": "nest build && tsc-alias",
     "start": "node dist/main.js",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main.js",
-    "start:render": "npm run migration:run && npm run start:prod",
+    "start:render": "npm run migration:run:prod && npm run start:prod",
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "format": "prettier --write \"{src,test}/**/*.ts\"",
     "test": "jest",
@@ -20,6 +20,7 @@
     "migration:generate": "node ./scripts/typeorm-migration.js generate",
     "migration:create": "node ./scripts/typeorm-migration.js create",
     "migration:run": "npm run typeorm -- migration:run",
+    "migration:run:prod": "node dist/common/database/run-migrations.js",
     "migration:revert": "npm run typeorm -- migration:revert",
     "seed": "ts-node ./scripts/seed.ts",
     "docker:up": "docker compose up --build -d",
@@ -66,6 +67,7 @@
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.8.3"
   }
 }

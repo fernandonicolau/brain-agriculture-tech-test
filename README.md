@@ -30,13 +30,13 @@ O objetivo foi construir uma base de API organizada, evolutiva e preparada para 
 
 ## Arquitetura Adotada
 
-A aplicação segue uma organização modular por domínio e responsabilidade.
+A aplicação segue uma organização modular por contexto e por camada.
 
-- `controller`: define contrato HTTP e integração com Swagger
-- `service`: concentra regras de negócio e orquestração
-- `repository`: encapsula acesso a dados via TypeORM
-- `dto`: define contratos de entrada e saída
-- `common`: concentra infraestrutura compartilhada, configuração, logging, filtros, validações e banco
+- `presentation/http`: controllers, DTOs HTTP e mapeadores de entrada e saída
+- `application`: contratos, serviços e orquestração de casos de uso
+- `domain`: regras de negócio puras
+- `infrastructure`: persistência e adapters TypeORM
+- `common`: infraestrutura compartilhada, configuração, logging, filtros, validações e banco
 
 Essa separação foi escolhida para manter baixo acoplamento, facilitar testes e permitir evolução incremental sem poluir controllers com lógica de negócio.
 
@@ -60,11 +60,27 @@ src/
 │  ├─ agriculture/
 │  │  └─ entities/
 │  ├─ crops/
+│  │  ├─ application/
+│  │  ├─ infrastructure/
+│  │  └─ presentation/
 │  ├─ dashboard/
+│  │  ├─ application/
+│  │  ├─ infrastructure/
+│  │  └─ presentation/
 │  ├─ farms/
+│  │  ├─ application/
+│  │  ├─ domain/
+│  │  ├─ infrastructure/
+│  │  └─ presentation/
 │  ├─ harvests/
+│  │  ├─ application/
+│  │  ├─ infrastructure/
+│  │  └─ presentation/
 │  ├─ health/
 │  └─ producers/
+│     ├─ application/
+│     ├─ infrastructure/
+│     └─ presentation/
 ├─ app.module.ts
 └─ main.ts
 
@@ -277,16 +293,16 @@ Copy-Item .env.example .env
 docker compose up --build
 ```
 
-### 3. Rodar migrations
+### 3. Rodar migrations dentro do container da aplicação
 
 ```bash
-npm run migration:run
+npm run migration:run:docker
 ```
 
-### 4. Rodar seed
+### 4. Rodar seed dentro do container da aplicação
 
 ```bash
-npm run seed
+npm run seed:docker
 ```
 
 ### 5. Encerrar ambiente
@@ -348,16 +364,22 @@ O seed atual:
 - remove os dados de domínio antes de inserir novos registros
 - pode ser executado repetidamente em desenvolvimento
 - cria:
-  - 3 produtores
-  - 4 fazendas
-  - 5 safras
-  - 5 culturas
-  - 7 associações safra-cultura
+  - 100 produtores
+  - 1 a 4 fazendas por produtor
+  - 1 a 3 safras por fazenda
+  - culturas compartilhadas entre várias safras, incluindo `Milho` e `Soja`
+  - dados suficientes para alimentar o dashboard com distribuição rica por estado, cultura e uso do solo
 
 Execução:
 
 ```bash
 npm run seed
+```
+
+Com Docker:
+
+```bash
+npm run seed:docker
 ```
 
 ## Execução de Testes
@@ -508,7 +530,7 @@ O projeto foi preparado para deploy simples em nuvem com foco em compatibilidade
 
 - [Dockerfile.dev](c:/Users/andre/Desktop/Desafio/brain-agriculture-tech-test/Dockerfile.dev): imagem de desenvolvimento com hot reload
 - [Dockerfile](c:/Users/andre/Desktop/Desafio/brain-agriculture-tech-test/Dockerfile): imagem final de produção com build multi-stage
-- [docker-compose.yml](c:/Users/andre/Desktop/Desafio/brain-agriculture-tech-test/docker-compose.yml): ambiente local com API e PostgreSQL
+- [docker-compose.yml](c:/Users/andre/Desktop/Desafio/brain-agriculture-tech-test/docker-compose.yml): ambiente local de desenvolvimento com API e PostgreSQL
 
 ### Ajustes de produção adotados
 
@@ -516,8 +538,9 @@ O projeto foi preparado para deploy simples em nuvem com foco em compatibilidade
 - imagem final sem dependências de desenvolvimento
 - `NODE_ENV=production` no runtime
 - execução sem hot reload
-- start estável via `npm run start:prod`
+- start estável via `npm run start:render`
 - liveness e readiness para health checks
+- migrations executadas antes da inicialização da API na imagem de produção
 
 ### Variáveis de ambiente para produção
 
@@ -542,38 +565,32 @@ DB_NAME=...
 
 ### Migrations em produção
 
-A recomendação é executar migrations antes do start da aplicação em cada release.
-
-Exemplo:
-
-```bash
-npm run migration:run
-npm run start:prod
-```
-
-Se a plataforma permitir apenas um comando de start, o projeto já possui:
+O projeto já possui:
 
 ```bash
 npm run start:render
 ```
 
-Esse comando executa migrations e depois sobe a aplicação. Em ambientes com múltiplas réplicas, o ideal é mover migrations para job ou etapa separada do deploy.
+Esse comando executa migrations e depois sobe a aplicação. Como o `Dockerfile` de produção já usa esse comando, o deploy no Render pode depender apenas do `Dockerfile`.
+
+Em ambientes com múltiplas réplicas, o ideal continua sendo mover migrations para job ou etapa separada do deploy.
 
 ### Deploy no Render
 
 O projeto inclui um blueprint opcional em [render.yaml](c:/Users/andre/Desktop/Desafio/brain-agriculture-tech-test/render.yaml).
+Ele está preparado para uso com PostgreSQL externo, como Supabase, via `DATABASE_URL`.
 
 Passo a passo resumido:
 
 1. Criar um novo serviço no Render a partir do repositório.
 2. Usar o `render.yaml` ou configurar manualmente um Web Service com Docker.
-3. Provisionar um PostgreSQL no próprio Render.
+3. Configurar a conexão com o PostgreSQL externo, como Supabase.
 4. Garantir as variáveis:
-   `NODE_ENV`, `PORT`, `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_NAME`
+   `NODE_ENV`, `PORT`, `DATABASE_URL`, `DB_SSL`, `DB_SSL_REJECT_UNAUTHORIZED`
 5. Definir health check em:
    `/api/v1/health/live`
-6. Executar migrations:
-   preferencialmente em job separado, ou via `npm run start:render` se o ambiente for simples
+6. Executar deploy:
+   o `Dockerfile` de produção já usa `npm run start:render`, que roda migrations antes de subir a API
 7. Validar:
    - `GET /api/v1/health/live`
    - `GET /api/v1/health/ready`
@@ -585,6 +602,12 @@ Passo a passo resumido:
 docker build -t brain-agriculture-api .
 docker run --env-file .env -p 3000:3000 brain-agriculture-api
 ```
+
+Observações:
+
+- o `docker-compose.yml` atual é voltado para desenvolvimento
+- para migrations e seed com Compose, use `npm run migration:run:docker` e `npm run seed:docker`
+- a imagem de produção do `Dockerfile` continua adequada para deploy direto no Render
 
 ## Possíveis Melhorias Futuras
 

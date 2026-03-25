@@ -10,29 +10,9 @@ services:
         value: production
       - key: PORT
         value: 3000
-      - key: DB_HOST
-        fromDatabase:
-          name: brain-agriculture-postgres
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: brain-agriculture-postgres
-          property: port
-      - key: DB_USERNAME
-        fromDatabase:
-          name: brain-agriculture-postgres
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: brain-agriculture-postgres
-          property: password
-      - key: DB_NAME
-        fromDatabase:
-          name: brain-agriculture-postgres
-          property: database
-
-databases:
-  - name: brain-agriculture-postgres
-    plan: free
-    databaseName: brain_agriculture
-    user: brain_agriculture
+      - key: DATABASE_URL
+        sync: false
+      - key: DB_SSL
+        value: "true"
+      - key: DB_SSL_REJECT_UNAUTHORIZED
+        value: "false"

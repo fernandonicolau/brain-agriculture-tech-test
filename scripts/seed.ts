@@ -34,101 +34,189 @@ type SeedHarvestCrop = {
   cropName: string;
 };
 
-const producersSeed: SeedProducer[] = [
-  {
-    document: '52998224725',
-    name: 'Maria da Silva',
-  },
-  {
-    document: '11144477735',
-    name: 'Joao Pereira',
-  },
-  {
-    document: '04252011000110',
-    name: 'Agro Vale Ltda',
-  },
+const TOTAL_PRODUCERS = 100;
+
+const firstNames = [
+  'Ana',
+  'Bruno',
+  'Carlos',
+  'Daniela',
+  'Eduardo',
+  'Fernanda',
+  'Gabriel',
+  'Helena',
+  'Igor',
+  'Juliana',
+  'Kaique',
+  'Larissa',
+  'Marcelo',
+  'Natalia',
+  'Otavio',
+  'Patricia',
+  'Rafael',
+  'Simone',
+  'Thiago',
+  'Vanessa',
 ];
 
-const farmsSeed: SeedFarm[] = [
-  {
-    producerDocument: '52998224725',
-    name: 'Fazenda Primavera',
-    city: 'Uberaba',
-    state: 'MG',
-    totalArea: '1200.00',
-    arableArea: '850.00',
-    vegetationArea: '350.00',
-  },
-  {
-    producerDocument: '11144477735',
-    name: 'Sitio Boa Esperanca',
-    city: 'Ribeirao Preto',
-    state: 'SP',
-    totalArea: '900.00',
-    arableArea: '650.00',
-    vegetationArea: '250.00',
-  },
-  {
-    producerDocument: '04252011000110',
-    name: 'Fazenda Horizonte',
-    city: 'Sorriso',
-    state: 'MT',
-    totalArea: '2000.00',
-    arableArea: '1500.00',
-    vegetationArea: '500.00',
-  },
-  {
-    producerDocument: '04252011000110',
-    name: 'Fazenda Santa Luzia',
-    city: 'Rio Verde',
-    state: 'GO',
-    totalArea: '1500.00',
-    arableArea: '1000.00',
-    vegetationArea: '500.00',
-  },
+const lastNames = [
+  'Silva',
+  'Souza',
+  'Oliveira',
+  'Santos',
+  'Pereira',
+  'Costa',
+  'Rodrigues',
+  'Almeida',
+  'Nogueira',
+  'Carvalho',
+  'Gomes',
+  'Ribeiro',
+  'Martins',
+  'Lima',
+  'Barbosa',
 ];
 
-const cropsSeed = ['Soja', 'Milho', 'Algodao', 'Cafe', 'Cana-de-acucar'];
+const citiesByState: Record<string, string[]> = {
+  MT: ['Sorriso', 'Sinop', 'Lucas do Rio Verde', 'Primavera do Leste'],
+  GO: ['Rio Verde', 'Jatai', 'Mineiros', 'Cristalina'],
+  MS: ['Dourados', 'Ponta Pora', 'Maracaju', 'Sidrolandia'],
+  MG: ['Uberaba', 'Patos de Minas', 'Unai', 'Patrocinio'],
+  SP: ['Ribeirao Preto', 'Franca', 'Barretos', 'Jaboticabal'],
+  PR: ['Londrina', 'Cascavel', 'Toledo', 'Maringa'],
+  BA: ['Luis Eduardo Magalhaes', 'Barreiras', 'Formosa do Rio Preto', 'Sao Desiderio'],
+  RS: ['Passo Fundo', 'Cruz Alta', 'Nao-Me-Toque', 'Santa Rosa'],
+};
 
-const harvestsSeed: SeedHarvest[] = [
-  {
-    farmName: 'Fazenda Primavera',
-    name: 'Safra 2023/2024',
-    year: 2023,
-  },
-  {
-    farmName: 'Fazenda Primavera',
-    name: 'Safra 2024/2025',
-    year: 2024,
-  },
-  {
-    farmName: 'Sitio Boa Esperanca',
-    name: 'Safra 2024',
-    year: 2024,
-  },
-  {
-    farmName: 'Fazenda Horizonte',
-    name: 'Safra Verao 2024/2025',
-    year: 2024,
-  },
-  {
-    farmName: 'Fazenda Santa Luzia',
-    name: 'Safra 2025',
-    year: 2025,
-  },
+const states = Object.keys(citiesByState);
+
+const cropsSeed = [
+  'Soja',
+  'Milho',
+  'Algodao',
+  'Cafe',
+  'Cana-de-acucar',
+  'Feijao',
+  'Trigo',
+  'Sorgo',
 ];
 
-const harvestCropsSeed: SeedHarvestCrop[] = [
-  { harvestName: 'Safra 2023/2024', cropName: 'Cafe' },
-  { harvestName: 'Safra 2024/2025', cropName: 'Milho' },
-  { harvestName: 'Safra 2024/2025', cropName: 'Soja' },
-  { harvestName: 'Safra 2024', cropName: 'Cana-de-acucar' },
-  { harvestName: 'Safra Verao 2024/2025', cropName: 'Algodao' },
-  { harvestName: 'Safra Verao 2024/2025', cropName: 'Soja' },
-  { harvestName: 'Safra 2025', cropName: 'Milho' },
-];
+function pad(value: number, length: number): string {
+  return value.toString().padStart(length, '0');
+}
+
+function createDocument(index: number): string {
+  if (index % 10 === 0) {
+    return `54${pad(index, 12)}`;
+  }
+
+  return `73${pad(index, 9)}`;
+}
+
+function pick<T>(items: T[], index: number): T {
+  return items[index % items.length] as T;
+}
+
+function toFixedArea(value: number): string {
+  return value.toFixed(2);
+}
+
+function buildSeedData(): {
+  producers: SeedProducer[];
+  farms: SeedFarm[];
+  harvests: SeedHarvest[];
+  harvestCrops: SeedHarvestCrop[];
+} {
+  const producers: SeedProducer[] = [];
+  const farms: SeedFarm[] = [];
+  const harvests: SeedHarvest[] = [];
+  const harvestCrops: SeedHarvestCrop[] = [];
+
+  for (let index = 1; index <= TOTAL_PRODUCERS; index += 1) {
+    const firstName = pick(firstNames, index);
+    const lastName = pick(lastNames, index * 2);
+    const producerDocument = createDocument(index);
+    const producerName =
+      index % 10 === 0
+        ? `Agro ${firstName} ${lastName} Ltda`
+        : `${firstName} ${lastName} ${pad(index, 3)}`;
+
+    producers.push({
+      document: producerDocument,
+      name: producerName,
+    });
+
+    const farmsPerProducer = (index % 4) + 1;
+
+    for (let farmOffset = 1; farmOffset <= farmsPerProducer; farmOffset += 1) {
+      const farmNumber = farms.length + 1;
+      const state = pick(states, index + farmOffset);
+      const city = pick(citiesByState[state] ?? ['Cidade'], index + farmOffset * 3);
+      const totalArea = 600 + ((index * 97 + farmOffset * 31) % 2400);
+      const arableRatio = 0.52 + ((index + farmOffset) % 18) / 100;
+      const arableArea = Number((totalArea * arableRatio).toFixed(2));
+      const vegetationArea = Number((totalArea - arableArea).toFixed(2));
+      const farmName = `Fazenda ${city} ${pad(farmNumber, 3)}`;
+
+      farms.push({
+        producerDocument,
+        name: farmName,
+        city,
+        state,
+        totalArea: toFixedArea(totalArea),
+        arableArea: toFixedArea(arableArea),
+        vegetationArea: toFixedArea(vegetationArea),
+      });
+
+      const years = [2023, 2024, 2025].slice(0, (farmNumber % 3) + 1);
+
+      years.forEach((year, yearIndex) => {
+        const harvestName =
+          year === 2025 ? `Safra ${year} - ${farmName}` : `Safra ${year}/${year + 1} - ${farmName}`;
+
+        harvests.push({
+          farmName,
+          name: harvestName,
+          year,
+        });
+
+        const assignedCrops = new Set<string>();
+        assignedCrops.add('Milho');
+        assignedCrops.add(pick(cropsSeed, index + farmOffset + yearIndex));
+
+        if ((farmNumber + year) % 2 === 0) {
+          assignedCrops.add('Soja');
+        }
+
+        if ((farmNumber + year) % 5 === 0) {
+          assignedCrops.add('Algodao');
+        }
+
+        if ((farmNumber + year) % 7 === 0) {
+          assignedCrops.add('Feijao');
+        }
+
+        Array.from(assignedCrops).forEach((cropName) => {
+          harvestCrops.push({
+            harvestName,
+            cropName,
+          });
+        });
+      });
+    }
+  }
+
+  return {
+    producers,
+    farms,
+    harvests,
+    harvestCrops,
+  };
+}
 
 async function seed(): Promise<void> {
+  const { producers, farms, harvests, harvestCrops } = buildSeedData();
+
   await dataSource.initialize();
 
   try {
@@ -143,18 +231,18 @@ async function seed(): Promise<void> {
         RESTART IDENTITY CASCADE
       `);
 
-      const producers = await manager.save(
+      const savedProducers = await manager.save(
         Producer,
-        producersSeed.map((producer) => manager.create(Producer, producer)),
+        producers.map((producer) => manager.create(Producer, producer)),
       );
 
       const producerByDocument = new Map(
-        producers.map((producer) => [producer.document, producer]),
+        savedProducers.map((producer) => [producer.document, producer]),
       );
 
-      const farms = await manager.save(
+      const savedFarms = await manager.save(
         Farm,
-        farmsSeed.map((farm) =>
+        farms.map((farm) =>
           manager.create(Farm, {
             producerId: producerByDocument.get(farm.producerDocument)?.id,
             name: farm.name,
@@ -167,9 +255,9 @@ async function seed(): Promise<void> {
         ),
       );
 
-      const farmByName = new Map(farms.map((farm) => [farm.name, farm]));
+      const farmByName = new Map(savedFarms.map((farm) => [farm.name, farm]));
 
-      const crops = await manager.save(
+      const savedCrops = await manager.save(
         Crop,
         cropsSeed.map((name) =>
           manager.create(Crop, {
@@ -178,11 +266,11 @@ async function seed(): Promise<void> {
         ),
       );
 
-      const cropByName = new Map(crops.map((crop) => [crop.name, crop]));
+      const cropByName = new Map(savedCrops.map((crop) => [crop.name, crop]));
 
-      const harvests = await manager.save(
+      const savedHarvests = await manager.save(
         Harvest,
-        harvestsSeed.map((harvest) =>
+        harvests.map((harvest) =>
           manager.create(Harvest, {
             farmId: farmByName.get(harvest.farmName)?.id,
             name: harvest.name,
@@ -191,11 +279,11 @@ async function seed(): Promise<void> {
         ),
       );
 
-      const harvestByName = new Map(harvests.map((harvest) => [harvest.name, harvest]));
+      const harvestByName = new Map(savedHarvests.map((harvest) => [harvest.name, harvest]));
 
       await manager.save(
         HarvestCrop,
-        harvestCropsSeed.map((item) =>
+        harvestCrops.map((item) =>
           manager.create(HarvestCrop, {
             harvestId: harvestByName.get(item.harvestName)?.id,
             cropId: cropByName.get(item.cropName)?.id,
@@ -205,11 +293,14 @@ async function seed(): Promise<void> {
     });
 
     console.log('Seed completed successfully.');
-    console.log(`Producers: ${producersSeed.length}`);
-    console.log(`Farms: ${farmsSeed.length}`);
-    console.log(`Harvests: ${harvestsSeed.length}`);
+    console.log(`Producers: ${producers.length}`);
+    console.log(`Farms: ${farms.length}`);
+    console.log(`Harvests: ${harvests.length}`);
     console.log(`Crops: ${cropsSeed.length}`);
-    console.log(`HarvestCrop associations: ${harvestCropsSeed.length}`);
+    console.log(`HarvestCrop associations: ${harvestCrops.length}`);
+    console.log(
+      'Shared crops example: Milho and Soja are reused across multiple farms and harvests.',
+    );
   } finally {
     await dataSource.destroy();
   }
