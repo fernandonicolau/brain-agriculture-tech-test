@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 
-import { CropsModule } from '../crops/crops.module';
-import { DashboardModule } from '../dashboard/dashboard.module';
-import { FarmsModule } from '../farms/farms.module';
-import { HarvestsModule } from '../harvests/harvests.module';
-import { ProducersModule } from '../producers/producers.module';
+import { CropsModule } from '@/modules/crops/crops.module';
+import { DashboardModule } from '@/modules/dashboard/dashboard.module';
+import { FarmsModule } from '@/modules/farms/farms.module';
+import { HarvestsModule } from '@/modules/harvests/harvests.module';
+import { ProducersModule } from '@/modules/producers/producers.module';
 
 @Module({
   imports: [ProducersModule, FarmsModule, CropsModule, HarvestsModule, DashboardModule],

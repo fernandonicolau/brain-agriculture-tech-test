@@ -58,6 +58,18 @@ function readNumberEnv(name: string, fallback?: number): number {
   return parsedValue;
 }
 
+function safeDecodeURIComponent(value: string): string {
+  if (value === '') {
+    return value;
+  }
+
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 function readDatabaseConfigFromUrl(
   databaseUrl: string,
 ): Pick<EnvironmentVariables, 'DB_HOST' | 'DB_PORT' | 'DB_USERNAME' | 'DB_PASSWORD' | 'DB_NAME'> {
@@ -82,9 +94,9 @@ function readDatabaseConfigFromUrl(
   return {
     DB_HOST: parsedUrl.hostname,
     DB_PORT: parsedUrl.port ? Number(parsedUrl.port) : 5432,
-    DB_USERNAME: decodeURIComponent(parsedUrl.username),
-    DB_PASSWORD: decodeURIComponent(parsedUrl.password),
-    DB_NAME: decodeURIComponent(databaseName),
+    DB_USERNAME: safeDecodeURIComponent(parsedUrl.username),
+    DB_PASSWORD: safeDecodeURIComponent(parsedUrl.password),
+    DB_NAME: safeDecodeURIComponent(databaseName),
   };
 }
 
